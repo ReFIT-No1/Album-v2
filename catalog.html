@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050b14">
+  <meta name="description" content="千寻电气产品目录：按系列浏览产品、型号与技术参数。">
+  <title>千寻电气 · 产品目录</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20261119b">
+  <link rel="stylesheet" href="catalog.css?v=20261119b">
+</head>
+<body class="catalog-body">
+  <div class="app catalog-app" id="catalogApp">
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient-glow glow-a"></div>
+      <div class="ambient-glow glow-b"></div>
+      <div class="ambient-nebula"></div>
+      <div class="ambient-milkyway"></div>
+      <canvas class="starfield" id="catalogStarfield"></canvas>
+      <div class="ambient-grid"></div>
+      <div class="ambient-noise"></div>
+      <div class="ambient-vignette"></div>
+    </div>
+
+    <header class="topbar catalog-topbar">
+      <a class="brand" href="#" id="catalogBrand" aria-label="返回第一个系列">
+        <span class="brand-copy">
+          <img class="brand-logo" src="assets/brand/chaser-logo.webp" width="947" height="323" alt="Chaser 千寻电气" draggable="false">
+          <span class="brand-cn">千寻电气 <i></i> 产品目录</span>
+        </span>
+      </a>
+
+      <nav class="top-actions catalog-actions" aria-label="目录工具">
+        <button class="tool-btn tool-btn--text" id="catalogSearchBtn" type="button" aria-label="搜索产品型号或系列" title="搜索（/）">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3"/></svg>
+          <span>搜索</span>
+        </button>
+        <button class="tool-btn tool-btn--text" id="catalogPdfBtn" type="button" aria-label="下载完整 PDF" title="下载完整 PDF">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 18h14"/></svg>
+          <span>PDF</span>
+        </button>
+        <button class="tool-btn" id="catalogShareBtn" type="button" aria-label="分享本目录" title="分享">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.1"/><circle cx="18" cy="6" r="2.1"/><circle cx="18" cy="18" r="2.1"/><path d="m8 11 7.8-4M8 13l7.8 4"/></svg>
+        </button>
+        <button class="tool-btn" id="catalogHelpBtn" type="button" aria-label="查看操作提示" title="操作提示">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M9.7 9.4a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.2.9-1.2 1.8"/><circle cx="12" cy="16.7" r=".8" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <main class="catalog-main" id="catalogMain">
+      <aside class="series-panel" aria-label="系列导航">
+        <div class="series-panel__head">
+          <span class="catalog-eyebrow">PRODUCT SERIES</span>
+          <h1>系列导航</h1>
+          <p>转动转盘，查看对应产品。</p>
+        </div>
+
+        <div class="series-dial" id="seriesDial">
+          <div class="series-dial__orbit series-dial__orbit--outer" aria-hidden="true"></div>
+          <div class="series-dial__orbit series-dial__orbit--inner" aria-hidden="true"></div>
+          <div class="series-dial__ticks" id="seriesDialTicks" aria-hidden="true"></div>
+          <div class="series-dial__nodes" id="seriesDialNodes"></div>
+          <div class="series-dial__center">
+            <span class="series-dial__count" id="dialCount">01 / 34</span>
+            <strong class="series-dial__name" id="dialName">蒸汽开关系列</strong>
+            <span class="series-dial__range" id="dialRange">印刷页 01</span>
+          </div>
+        </div>
+
+        <div class="series-dial__controls">
+          <button class="catalog-arrow" id="prevSeries" type="button" aria-label="上一个系列">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.8-6.2 6.2 6.2 6.2"/></svg>
+          </button>
+          <span class="series-dial__hint">点击圆点切换</span>
+          <button class="catalog-arrow" id="nextSeries" type="button" aria-label="下一个系列">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5.8 6.2 6.2-6.2 6.2"/></svg>
+          </button>
+        </div>
+
+        <div class="series-panel__foot">
+          <span id="seriesTotal">34 个系列</span>
+          <span>·</span>
+          <span id="seriesPageTotal">63 个产品页</span>
+        </div>
+      </aside>
+
+      <section class="series-stage" id="seriesStage" aria-live="polite">
+        <header class="series-head">
+          <div>
+            <div class="catalog-eyebrow" id="seriesKicker">SERIES 01</div>
+            <h2 class="series-title" id="seriesTitle">蒸汽开关系列</h2>
+            <p class="series-subtitle" id="seriesSubtitle">印刷页 01 · 1 个产品页</p>
+          </div>
+          <div class="series-head__meta">
+            <span id="seriesPageCount">01 — 01</span>
+            <span>PRODUCT CATALOGUE</span>
+          </div>
+        </header>
+        <div class="series-pages" id="seriesPages"></div>
+        <footer class="series-stage__foot">
+          <span>千寻电气 · 温州千寻电气科技有限公司</span>
+          <a href="index.html?book=1">查看原版翻页图册</a>
+        </footer>
+      </section>
+    </main>
+
+    <footer class="catalog-footer">
+      <div class="catalog-footer__identity">
+        <span class="catalog-footer__mark">QX</span>
+        <span>千寻电气 · 产品目录</span>
+      </div>
+      <div class="catalog-contact">
+        <button type="button" data-copy="135 8779 8177">135 8779 8177</button>
+        <span>·</span>
+        <button type="button" data-copy="Una@chaserr.cc">Una@chaserr.cc</button>
+        <span>·</span>
+        <button type="button" data-copy="https://cn.qianxunele.com">cn.qianxunele.com</button>
+      </div>
+      <a class="catalog-footer__link" href="assets/qianxun-catalog.pdf" download>下载完整 PDF</a>
+    </footer>
+  </div>
+
+  <div class="catalog-mobile-note">
+    <span class="catalog-eyebrow">DESKTOP EDITION</span>
+    <h1>请在电脑上查看新版产品目录</h1>
+    <p>新版目录目前优先适配电脑端。手机端可以继续使用原版翻页图册。</p>
+    <a class="catalog-mobile-note__btn" href="index.html?book=1">打开手机版翻页图册</a>
+  </div>
+
+  <div class="catalog-modal" id="catalogSearchModal" role="dialog" aria-modal="true" aria-labelledby="catalogSearchTitle" aria-hidden="true">
+    <div class="catalog-modal__card catalog-search-card">
+      <div class="catalog-modal__head">
+        <div>
+          <span class="catalog-eyebrow">SEARCH</span>
+          <h2 id="catalogSearchTitle">搜索系列或型号</h2>
+        </div>
+        <button class="catalog-modal__close" type="button" data-close="catalogSearchModal" aria-label="关闭搜索">×</button>
+      </div>
+      <div class="catalog-search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3"/></svg>
+        <input id="catalogSearchInput" type="search" placeholder="输入型号、系列名，例如 QX198A / 温控器" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd>
+      </div>
+      <div class="catalog-search-results" id="catalogSearchResults" role="listbox"></div>
+      <p class="catalog-search-empty" id="catalogSearchEmpty" hidden>没有找到对应内容。</p>
+    </div>
+  </div>
+
+  <div class="catalog-modal" id="catalogShareModal" role="dialog" aria-modal="true" aria-labelledby="catalogShareTitle" aria-hidden="true">
+    <div class="catalog-modal__card catalog-share-card">
+      <div class="catalog-modal__head">
+        <div>
+          <span class="catalog-eyebrow">SHARE</span>
+          <h2 id="catalogShareTitle">分享产品目录</h2>
+        </div>
+        <button class="catalog-modal__close" type="button" data-close="catalogShareModal" aria-label="关闭分享">×</button>
+      </div>
+      <div class="catalog-share-body">
+        <div class="catalog-share-qr"><img id="catalogShareQr" src="assets/brand/share-qr.png" alt="千寻电气产品目录二维码"></div>
+        <div>
+          <p class="catalog-share-title">扫码查看整本目录</p>
+          <p class="catalog-share-sub">微信、手机相机或浏览器扫码</p>
+          <div class="catalog-share-url">
+            <input id="catalogShareUrl" type="text" readonly value="https://refit-no1.github.io/Album-v2/" aria-label="目录网址">
+            <button id="catalogCopyUrl" type="button">复制</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catalog-modal" id="catalogHelpModal" role="dialog" aria-modal="true" aria-labelledby="catalogHelpTitle" aria-hidden="true">
+    <div class="catalog-modal__card catalog-help-card">
+      <div class="catalog-modal__head">
+        <div>
+          <span class="catalog-eyebrow">GUIDE</span>
+          <h2 id="catalogHelpTitle">使用说明</h2>
+        </div>
+        <button class="catalog-modal__close" type="button" data-close="catalogHelpModal" aria-label="关闭说明">×</button>
+      </div>
+      <div class="catalog-help-list">
+        <div><b>左侧转盘</b><span>点击圆点或左右按钮切换产品系列。</span></div>
+        <div><b>产品卡片</b><span>每个型号单独展示，参数集中在本页下方。</span></div>
+        <div><b>查看原页</b><span>点击“查看原始版面”可打开原图册页面。</span></div>
+        <div><b>搜索</b><span>按 / 打开搜索，支持系列名、型号和参数关键词。</span></div>
+        <div><b>Esc</b><span>关闭搜索、分享和说明弹窗。</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catalog-modal" id="catalogOriginalModal" role="dialog" aria-modal="true" aria-labelledby="catalogOriginalTitle" aria-hidden="true">
+    <div class="catalog-modal__card catalog-original-card">
+      <div class="catalog-modal__head">
+        <div>
+          <span class="catalog-eyebrow">ORIGINAL PAGE</span>
+          <h2 id="catalogOriginalTitle">原始版面</h2>
+        </div>
+        <button class="catalog-modal__close" type="button" data-close="catalogOriginalModal" aria-label="关闭原始版面">×</button>
+      </div>
+      <div class="catalog-original-stage"><img id="catalogOriginalImg" alt=""></div>
+    </div>
+  </div>
+
+  <div class="toast" id="catalogToast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="catalogLive" aria-live="polite"></div>
+
+  <noscript><div class="noscript">请启用 JavaScript 后查看产品目录。</div></noscript>
+  <script src="data/catalog-data.js?v=20261119b"></script>
+  <script src="catalog.js?v=20261119b"></script>
+</body>
+</html>

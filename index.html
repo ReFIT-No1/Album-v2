@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050b14">
   <meta name="description" content="千寻电气产品图册电子版，支持桌面双页、手机单页/双页切换与翻页阅读。">
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      if (!params.has('book') && window.innerWidth >= 901) {
+        window.location.replace('catalog.html');
+      }
+    })();
+  </script>
   <title>千寻电气 · 产品图册</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <script>
@@ -15,7 +23,7 @@
   <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
   <link rel="preload" as="image" href="assets/pages/001.webp" media="(min-width: 1001px)" fetchpriority="high">
   <link rel="preload" as="image" href="assets/pages-mobile/001.webp" media="(max-width: 1000px)" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261119a">
+  <link rel="stylesheet" href="styles.css?v=20261119b">
 </head>
 <body class="is-intro">
   <div class="app is-intro" id="app">
@@ -415,8 +423,8 @@
     <div class="noscript">请启用浏览器 JavaScript 后重新打开本图册。</div>
   </noscript>
 
-  <script src="data/pages.js?v=20261119a"></script>
-  <script src="data/toc.js?v=20261119a"></script>
-  <script src="app.js?v=20261119a"></script>
+  <script src="data/pages.js?v=20261119b"></script>
+  <script src="data/toc.js?v=20261119b"></script>
+  <script src="app.js?v=20261119b"></script>
 </body>
 </html>
