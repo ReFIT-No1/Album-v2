@@ -60,6 +60,10 @@
       label.className = 'series-dot__label';
       label.textContent = item.name;
       dot.appendChild(label);
+      const number = document.createElement('span');
+      number.className = 'series-dot__num';
+      number.textContent = pad2(item.number);
+      dot.appendChild(number);
       dot.addEventListener('click', () => selectSeries(index));
       dot.addEventListener('mouseenter', () => showDialPreview(index));
       dot.addEventListener('mouseleave', () => showDialPreview(active));

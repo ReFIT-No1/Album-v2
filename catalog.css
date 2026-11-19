@@ -1203,3 +1203,21 @@
   .product-body { padding: 8px; }
   .product-model { font-size: 13px; }
 }
+
+.series-dot__num {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(160, 198, 230, .62);
+  font-family: var(--font-num, "Segoe UI", Arial, sans-serif);
+  font-size: 5.5px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.series-dot.is-active .series-dot__num {
+  color: #f4fcff;
+  font-size: 7px;
+  font-weight: 600;
+}
