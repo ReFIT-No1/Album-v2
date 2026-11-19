@@ -47,6 +47,19 @@
     return [model.name, model.crop].filter(Boolean).join(' ');
   }
 
+  function filterModels(models) {
+    const list = (models || []).filter((model) => model && model.name);
+    const normalized = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return list.filter((model) => {
+      const key = normalized(model.name);
+      return !list.some((other) => {
+        if (!other || other === model) return false;
+        const otherKey = normalized(other.name);
+        return otherKey.length > key.length + 1 && otherKey.startsWith(key);
+      });
+    });
+  }
+
   function buildDial() {
     dialNodes.replaceChildren();
     series.forEach((item, index) => {
@@ -144,12 +157,12 @@
   function productMarkup(model, item, page) {
     const specs = page.specs || [];
     const keySpecs = specs.slice(0, 3);
-    const image = model.crop || page.image;
+    const image = `${model.crop || page.image}?v=20261119d`;
     const fallback = model.fallback ? ' / 本页总览' : '';
     return `
       <article class="product-card">
         <div class="product-visual">
-          <img src="${escapeHtml(image)}" alt="${escapeHtml(model.name)}" loading="lazy" decoding="async">
+          <img src="${escapeHtml(image)}" alt="${escapeHtml(model.name)}" decoding="async">
           <span class="product-visual__page">P${pad2(page.page)}</span>
         </div>
         <div class="product-body">
@@ -178,7 +191,7 @@
         ${certsMarkup(page.certs)}
         ${specMarkup(page.specs, page.specsShared)}
         <div class="product-list">
-          ${(page.models || []).map((model) => productMarkup(model, item, page)).join('')}
+          ${filterModels(page.models).map((model) => productMarkup(model, item, page)).join('')}
         </div>
         <details class="page-ocr">
           <summary>本页完整文字信息</summary>
@@ -266,7 +279,7 @@
       hay: `${item.name} ${item.start} ${item.end}`
     });
     item.pages.forEach((page) => {
-      (page.models || []).forEach((model) => {
+      filterModels(page.models).forEach((model) => {
         searchItems.push({
           type: '型号',
           title: model.name,
