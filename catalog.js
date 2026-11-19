@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   const DATA = window.QIANXUN_CATALOG;
@@ -79,8 +79,6 @@
       number.textContent = pad2(item.number);
       dot.appendChild(number);
       dot.addEventListener('click', () => selectSeries(index));
-      dot.addEventListener('mouseenter', () => showDialPreview(index));
-      dot.addEventListener('mouseleave', () => showDialPreview(active));
       dialNodes.appendChild(dot);
     });
     positionDialNodes();
@@ -163,7 +161,7 @@
   function productMarkup(model, item, page) {
     const specs = page.specs || [];
     const keySpecs = specs.slice(0, 3);
-    const image = `${model.crop || page.image}?v=20261119e`;
+    const image = `${model.crop || page.image}?v=20261119f`;
     const fallback = model.fallback ? ' / 本页总览' : '';
     return `
       <article class="product-card">
