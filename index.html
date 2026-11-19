@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050b14">
+  <meta name="description" content="千寻电气产品图册电子版，支持桌面双页、手机单页/双页切换与翻页阅读。">
+  <title>千寻电气 · 产品图册</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script>
+    if (/MicroMessenger/i.test(navigator.userAgent) && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      document.documentElement.classList.add('is-wechat-ios');
+    }
+  </script>
+  <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/pages/001.webp" media="(min-width: 1001px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/pages-mobile/001.webp" media="(max-width: 1000px)" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20261119a">
+</head>
+<body class="is-intro">
+  <div class="app is-intro" id="app">
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient-glow glow-a"></div>
+      <div class="ambient-glow glow-b"></div>
+      <div class="ambient-nebula"></div>
+      <div class="ambient-milkyway"></div>
+      <canvas class="starfield" id="starfield"></canvas>
+      <div class="ambient-grid"></div>
+      <div class="ambient-noise"></div>
+      <div class="ambient-vignette"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="#cover" id="brandHome" aria-label="返回封面">
+        <span class="brand-copy">
+          <img class="brand-logo" src="assets/brand/chaser-logo.webp" width="947" height="323" alt="Chaser 千寻电气" draggable="false">
+          <span class="brand-cn">千寻电气 <i></i> 产品图册</span>
+        </span>
+      </a>
+
+      <nav class="top-actions" aria-label="阅读工具">
+        <span class="tool-group">
+          <button class="tool-btn tool-btn--text" id="tocBtn" type="button" aria-label="打开页面目录" aria-expanded="false" aria-controls="drawer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6.5v6.5H4zM13.5 5.5H20v6.5h-6.5zM4 12.5h6.5V19H4zM13.5 12.5H20V19h-6.5z"/></svg>
+            <span>目录</span>
+          </button>
+          <button class="tool-btn tool-btn--desktop" id="searchBtn" type="button" aria-label="搜索型号或系列" title="搜索（/）">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3"/></svg>
+          </button>
+          <button class="tool-btn tool-btn--desktop" id="pdfBtn" type="button" aria-label="下载整本 PDF" title="下载整本 PDF">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 18h14"/></svg>
+          </button>
+        </span>
+
+        <span class="tool-group">
+          <button class="tool-btn" id="zoomBtn" type="button" aria-label="查看大图" title="查看大图">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3M10.6 7.7v5.8M7.7 10.6h5.8"/></svg>
+          </button>
+          <button class="tool-btn" id="soundBtn" type="button" aria-label="开启翻页音效" aria-pressed="false" title="翻页音效">
+            <svg class="icon-sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.4v5.2h3.3l4.2 3.5V5.9L7.3 9.4H4z"/><path d="M15 8.4a5.2 5.2 0 0 1 0 7.2M17.8 5.8a8.7 8.7 0 0 1 0 12.4"/></svg>
+            <svg class="icon-sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.4v5.2h3.3l4.2 3.5V5.9L7.3 9.4H4z"/><path d="m15.2 9.2 5 5.6M20.2 9.2l-5 5.6"/></svg>
+          </button>
+          <button class="tool-btn" id="shareBtn" type="button" aria-label="分享整本图册" title="分享">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.1"/><circle cx="18" cy="6" r="2.1"/><circle cx="18" cy="18" r="2.1"/><path d="m8 11 7.8-4M8 13l7.8 4"/></svg>
+          </button>
+        </span>
+
+        <span class="tool-group">
+          <button class="tool-btn tool-btn--mobile" id="rotateBtn" type="button" aria-label="切换到双页模式" aria-pressed="false" title="切换单页 / 双页">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="page-icon-left" x="3.2" y="4.2" width="8" height="15.2" rx="1.8"/><rect class="page-icon-right" x="12.8" y="4.2" width="8" height="15.2" rx="1.8"/><path d="M7.2 8.2h.1M7.2 11.2h.1M7.2 14.2h.1M16.8 8.2h.1M16.8 11.2h.1M16.8 14.2h.1"/></svg>
+          </button>
+          <button class="tool-btn" id="fullBtn" type="button" aria-label="进入全屏" title="全屏">
+            <svg class="icon-expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+            <svg class="icon-compress" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5"/></svg>
+          </button>
+          <button class="tool-btn" id="helpBtn" type="button" aria-label="查看操作提示" title="操作提示（?）">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M9.7 9.4a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.2.9-1.2 1.8"/><circle cx="12" cy="16.7" r=".8" fill="currentColor" stroke="none"/></svg>
+          </button>
+        </span>
+      </nav>
+    </header>
+
+    <main class="stage" id="stage">
+      <button class="side-arrow side-arrow--prev" id="prevBtn" type="button" aria-label="上一页" title="上一页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.8 5.8-6.2 6.2 6.2 6.2"/></svg>
+      </button>
+
+      <div class="book-area" id="bookArea">
+        <div class="book-glow" aria-hidden="true"></div>
+        <div class="book-shadow" id="bookShadow" aria-hidden="true"></div>
+        <div class="book-viewport" id="bookViewport" aria-label="图册页面，可拖动翻页">
+          <div class="spread" id="spread">
+            <div class="leaf leaf--left" id="leafLeft" aria-hidden="true">
+              <img id="imgLeft" alt="" draggable="false" decoding="async">
+              <span class="leaf-light" aria-hidden="true"></span>
+              <span class="blank-paper"></span>
+            </div>
+            <div class="leaf leaf--right" id="leafRight" aria-hidden="true">
+              <img id="imgRight" alt="" draggable="false" decoding="async">
+              <span class="leaf-light" aria-hidden="true"></span>
+              <span class="blank-paper"></span>
+            </div>
+            <div class="leaf leaf--single" id="leafSingle" aria-hidden="true">
+              <img id="imgSingle" alt="" draggable="false" decoding="async">
+              <span class="leaf-light" aria-hidden="true"></span>
+              <span class="blank-paper"></span>
+            </div>
+
+            <div class="contact-highlight-glow" id="contactHighlightGlow" hidden aria-hidden="true"></div>
+            <div class="contact-highlight" id="contactHighlight" hidden aria-hidden="true"></div>
+            <button class="contact-highlight-hit" id="contactHighlightHit" type="button" aria-label="打开联系方式，可复制地址、电话、邮箱、网址" hidden></button>
+            <span class="contact-highlight-badge" id="contactHighlightBadge" hidden aria-hidden="true">点击查看 · 可复制</span>
+
+            <div class="gutter" id="gutter" aria-hidden="true"></div>
+            <div class="page-shade page-shade--left" id="shadeLeft" aria-hidden="true"></div>
+            <div class="page-shade page-shade--right" id="shadeRight" aria-hidden="true"></div>
+
+            <div class="sheet" id="sheet" aria-hidden="true">
+              <div class="sheet-face sheet-face--front" id="sheetFrontFace">
+                <img id="sheetFront" alt="" draggable="false" decoding="async">
+              </div>
+              <div class="sheet-face sheet-face--back" id="sheetBackFace">
+                <img id="sheetBack" alt="" draggable="false" decoding="async">
+                <span class="sheet-back-blank"></span>
+              </div>
+            </div>
+
+            <canvas class="flip-canvas" id="flipCanvas" aria-hidden="true"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <button class="side-arrow side-arrow--next" id="nextBtn" type="button" aria-label="下一页" title="下一页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.2 5.8 6.2 6.2-6.2 6.2"/></svg>
+      </button>
+
+      <button class="reading-hint" id="hint" type="button" aria-label="查看操作提示">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V6.8a1.7 1.7 0 0 1 3.4 0V10m0-1.5a1.7 1.7 0 0 1 3.4 0V11m0-1.3a1.7 1.7 0 0 1 3.4 0v4.6c0 3.3-2.6 5.9-5.9 5.9h-.7a5.7 5.7 0 0 1-4.2-1.9L4 14.2a1.7 1.7 0 0 1 2.5-2.3L8 13.5"/></svg>
+        <span id="hintText">拖动页角翻页 · 双击页面放大 · 操作提示</span>
+      </button>
+    </main>
+
+    <div class="chapter-ghost" id="chapterGhost" aria-hidden="true">
+      <span class="chapter-ghost__code" id="chapterGhostCode"></span>
+      <span class="chapter-ghost__name" id="chapterGhostName"></span>
+    </div>
+
+    <footer class="footer">
+      <div class="progress-row">
+        <span class="progress-index">01</span>
+        <div class="range-wrap">
+          <span class="range-ticks" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <input id="scrubber" class="scrubber" type="range" min="1" max="70" value="1" step="1" aria-label="跳转页面">
+        </div>
+        <span class="progress-index">70</span>
+      </div>
+      <div class="dock" role="group" aria-label="翻页控制">
+        <div class="dock-side">
+          <button class="dock-btn dock-btn--minor" id="firstBtn" type="button" aria-label="回到封面" title="回到封面">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 6.5 9.8 12l8.2 5.5z"/></svg>
+          </button>
+          <button class="dock-btn" id="prevPage" type="button" aria-label="上一页" title="上一页">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.8-6.2 6.2 6.2 6.2"/></svg>
+          </button>
+        </div>
+
+        <button class="page-status" id="pageStatus" type="button" aria-label="当前页，点击打开页面目录">
+          <span class="page-status__title" id="pageTitle">封面</span>
+          <span class="page-status__count" id="pageCount">01 / 70</span>
+        </button>
+
+        <div class="dock-side">
+          <button class="dock-btn" id="nextPage" type="button" aria-label="下一页" title="下一页">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5.8 6.2 6.2-6.2 6.2"/></svg>
+          </button>
+          <button class="dock-btn dock-btn--minor" id="lastBtn" type="button" aria-label="查看封底" title="查看封底">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 6.5 14.2 12 6 17.5z"/></svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">CATALOGUE</span>
+        <h2 id="drawerTitle">目录</h2>
+      </div>
+      <button class="drawer-close" id="drawerClose" type="button" aria-label="关闭目录">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-sub">
+      <span id="drawerSubCount">34 个产品系列</span>
+      <span class="drawer-sub__hint" id="drawerSubHint">点击系列快速跳转</span>
+    </div>
+    <div class="drawer-tabs" role="tablist" aria-label="目录视图">
+      <button class="drawer-tab is-active" id="tocTabDirectory" type="button" role="tab" aria-selected="true" aria-controls="directoryPanel">系列目录</button>
+      <button class="drawer-tab" id="tocTabThumbs" type="button" role="tab" aria-selected="false" aria-controls="thumbsPanel" tabindex="-1">页面缩略图</button>
+    </div>
+    <div class="drawer-tools">
+      <button class="drawer-pdf-btn" id="pdfBtnDrawer" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 18h14"/></svg>
+        <span>下载整本 PDF</span>
+        <em>带水印</em>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <div class="drawer-panel" id="directoryPanel" role="tabpanel" aria-labelledby="tocTabDirectory">
+        <div class="toc-head">
+          <span class="toc-head__title">产品系列</span>
+          <span class="toc-head__meta">PRODUCT SERIES · 01—65</span>
+        </div>
+        <div class="toc-list" id="tocList"></div>
+        <div class="toc-note">
+          <span>页码为图册印刷页码；点击系列进入该系列首页。</span>
+          <span>原目录未列出 20、56、66 页，可在“页面缩略图”中查看。</span>
+        </div>
+      </div>
+      <div class="drawer-panel" id="thumbsPanel" role="tabpanel" aria-labelledby="tocTabThumbs" hidden>
+        <div class="thumb-grid" id="thumbGrid"></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="zoom-modal" id="zoomModal" role="dialog" aria-modal="true" aria-labelledby="zoomTitle" aria-hidden="true">
+    <div class="zoom-head">
+      <div class="zoom-heading">
+        <span class="eyebrow">DETAIL VIEW</span>
+        <h2 id="zoomTitle">封面</h2>
+        <span class="zoom-meta" id="zoomMeta">01 / 70</span>
+      </div>
+      <button class="drawer-close" id="zoomClose" type="button" aria-label="关闭大图">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="zoom-stage" id="zoomStage">
+      <img id="zoomImg" alt="" draggable="false">
+      <div class="zoom-loading" id="zoomLoading" aria-hidden="true"><span></span></div>
+    </div>
+    <div class="zoom-foot">
+      <span class="zoom-tip" id="zoomTip">滚轮或双指缩放 · 放大后拖动查看</span>
+      <button class="zoom-back" id="zoomBack" type="button">返回图册</button>
+      <div class="zoom-tools" role="group" aria-label="图片缩放">
+        <button id="zoomOut" type="button" aria-label="缩小"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+        <span id="zoomLevel">100%</span>
+        <button id="zoomIn" type="button" aria-label="放大"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12"/></svg></button>
+        <button class="zoom-fit" id="zoomFit" type="button" aria-label="适应屏幕">适应</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-labelledby="searchTitle" aria-hidden="true">
+    <div class="search-panel">
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">SEARCH</span>
+          <h2 id="searchTitle">查找型号 / 系列</h2>
+        </div>
+        <button class="drawer-close" id="searchClose" type="button" aria-label="关闭搜索">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3"/></svg>
+        <input id="searchInput" type="search" placeholder="输入型号、系列名或页码，例如 QX198A / 33" autocomplete="off" spellcheck="false" aria-label="搜索型号、系列名或页码">
+        <kbd>/</kbd>
+      </div>
+      <div class="search-results" id="searchResults" role="listbox" aria-label="搜索结果"></div>
+      <div class="search-empty" id="searchEmpty" hidden>没有找到对应内容，试试型号的一部分，例如 QX198 或 198A。</div>
+      <div class="search-foot"><span>↑↓ 选择</span><span>Enter 跳转</span><span>Esc 关闭</span></div>
+    </div>
+  </div>
+
+  <div class="share-modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle" aria-hidden="true">
+    <div class="share-panel">
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">SHARE</span>
+          <h2 id="shareTitle">分享整本图册</h2>
+        </div>
+        <button class="drawer-close" id="shareClose" type="button" aria-label="关闭分享">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="share-body">
+        <div class="share-qr-wrap">
+          <img id="shareQr" src="assets/brand/share-qr.png" alt="千寻电气产品图册二维码">
+        </div>
+        <p class="share-title">扫码查看整本图册</p>
+        <p class="share-sub">微信、手机相机或浏览器扫码</p>
+        <div class="share-url-row">
+          <input id="shareUrl" type="text" readonly value="https://refit-no1.github.io/Album-v2/" aria-label="图册网址">
+          <button id="copyShare" type="button">复制</button>
+        </div>
+        <div class="share-actions">
+          <button id="nativeShare" type="button" hidden>系统分享</button>
+          <a id="downloadQr" href="assets/brand/share-qr.png" download="千寻电气产品图册-二维码.png">保存二维码</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
+    <div class="help-panel">
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">GUIDE</span>
+          <h2 id="helpTitle">操作提示</h2>
+        </div>
+        <button class="drawer-close" id="helpClose" type="button" aria-label="关闭操作提示">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="help-mode" id="helpMode">电脑版</div>
+      <div class="help-list" id="helpList"></div>
+      <p class="help-foot">按 <kbd>?</kbd> 随时打开此提示。</p>
+    </div>
+  </div>
+
+  <div class="pdf-modal" id="pdfModal" role="dialog" aria-modal="true" aria-labelledby="pdfTitle" aria-hidden="true">
+    <div class="pdf-panel">
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">PDF EXPORT</span>
+          <h2 id="pdfTitle">下载整本 PDF</h2>
+        </div>
+        <button class="drawer-close" id="pdfClose" type="button" aria-label="关闭 PDF 下载">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <p class="pdf-status" id="pdfStatus">准备生成 PDF…</p>
+      <div class="pdf-progress" aria-hidden="true"><span id="pdfBar"></span></div>
+      <p class="pdf-note">共 70 页，按图册顺序生成。每页带很浅的“千寻电气 · 产品图册”水印，不影响阅读。生成期间请保持页面打开。</p>
+      <button class="pdf-cancel" id="pdfCancel" type="button">取消</button>
+    </div>
+  </div>
+
+  <div class="contact-modal" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle" aria-hidden="true">
+    <div class="contact-panel">
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">CONTACT</span>
+          <h2 id="contactTitle">联系方式</h2>
+        </div>
+        <button class="drawer-close" id="contactClose" type="button" aria-label="关闭联系方式">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="contact-list" id="contactList">
+        <div class="contact-row" data-contact-row="address">
+          <span class="contact-row__label">地址</span>
+          <span class="contact-row__value">浙江温州乐清市天成街道天成工业区宁康东路2892号</span>
+          <button class="contact-row__copy" type="button" data-copy-contact="address">复制</button>
+        </div>
+        <div class="contact-row" data-contact-row="phone">
+          <span class="contact-row__label">电话</span>
+          <span class="contact-row__value">135 8779 8177</span>
+          <button class="contact-row__copy" type="button" data-copy-contact="phone">复制</button>
+        </div>
+        <div class="contact-row" data-contact-row="email">
+          <span class="contact-row__label">邮箱</span>
+          <span class="contact-row__value">Una@chaserr.cc</span>
+          <button class="contact-row__copy" type="button" data-copy-contact="email">复制</button>
+        </div>
+        <div class="contact-row" data-contact-row="website">
+          <span class="contact-row__label">网址</span>
+          <span class="contact-row__value">https://cn.qianxunele.com</span>
+          <button class="contact-row__copy" type="button" data-copy-contact="website">复制</button>
+        </div>
+      </div>
+      <p class="contact-note">点击“复制”即可复制内容，不会拨号、发送邮件或跳转网页。</p>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-inner">
+      <div class="loading-mark">
+        <svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <path d="M22 3.6 38.3 13v18L22 40.4 5.7 31V13z" stroke="url(#loadStroke)" stroke-width="1.2"/>
+          <circle cx="21.3" cy="21.4" r="6" stroke="#d9efff" stroke-width="1.7"/>
+          <path d="m25.8 25.8 5 5" stroke="#d9efff" stroke-width="1.7" stroke-linecap="round"/>
+          <defs><linearGradient id="loadStroke" x1="6" y1="4" x2="39" y2="40"><stop stop-color="#9ed8ff"/><stop offset="1" stop-color="#1e6dd2"/></linearGradient></defs>
+        </svg>
+      </div>
+      <p class="loading-title">千寻电气 · 产品图册</p>
+      <p class="loading-sub">正在展开图册</p>
+      <span class="loading-line"><i></i></span>
+    </div>
+  </div>
+
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-haze" aria-hidden="true"></div>
+    <div class="intro-scene">
+      <div class="intro-logo">
+        <img class="intro-logo-base" src="assets/brand/chaser-logo.webp" width="947" height="323" alt="Chaser 千寻电气">
+        <img class="intro-logo-shine" src="assets/brand/chaser-logo.webp" width="947" height="323" alt="" aria-hidden="true">
+      </div>
+      <div class="intro-name">千寻电气</div>
+      <div class="intro-full">温州千寻电气科技有限公司</div>
+      <div class="intro-rule" aria-hidden="true"></div>
+      <div class="intro-en">WENZHOU CHASER ELECTRICAL TECHNOLOGY CO., LTD.</div>
+      <div class="intro-tag">PRODUCT CATALOGUE</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+
+  <noscript>
+    <div class="noscript">请启用浏览器 JavaScript 后重新打开本图册。</div>
+  </noscript>
+
+  <script src="data/pages.js?v=20261119a"></script>
+  <script src="data/toc.js?v=20261119a"></script>
+  <script src="app.js?v=20261119a"></script>
+</body>
+</html>
