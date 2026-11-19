@@ -9,6 +9,7 @@
   const series = DATA.series;
   const DEFAULT_CERTS = ['CCC', 'CQC', 'TÜV', 'CE', 'CB', 'UL', 'ISO'];
   const dial = $('#seriesDial');
+  const seriesWheel = $('#seriesWheel');
   const dialNodes = $('#seriesDialNodes');
   const stage = $('#seriesStage');
   const pagesRoot = $('#seriesPages');
@@ -86,12 +87,13 @@
   }
 
   function dialGeometry() {
-    if (!dial) return { radius: 104, cx: 0, cy: 0 };
-    const rect = dial.getBoundingClientRect();
+    const element = seriesWheel || dial;
+    const width = element ? element.clientWidth : 520;
+    const height = element ? element.clientHeight : 520;
     return {
-      radius: Math.max(76, Math.min(rect.width, rect.height) / 2 - 26),
-      cx: rect.width / 2,
-      cy: rect.height / 2
+      radius: Math.max(160, Math.min(width, height) / 2 - 60),
+      cx: width / 2,
+      cy: height / 2
     };
   }
 
@@ -99,7 +101,7 @@
     const { radius, cx, cy } = dialGeometry();
     const count = series.length;
     $$('.series-dot', dialNodes).forEach((dot, index) => {
-      const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
+      const angle = (index / count) * Math.PI * 2;
       dot.style.left = `${cx + Math.cos(angle) * radius}px`;
       dot.style.top = `${cy + Math.sin(angle) * radius}px`;
     });
@@ -122,9 +124,13 @@
       dot.setAttribute('aria-current', index === active ? 'true' : 'false');
     });
     showDialPreview(active);
-    if (dial) {
-      dial.style.setProperty('--dial-rotation', `${-active * (360 / series.length)}deg`);
+    const step = 360 / series.length;
+    if (seriesWheel) {
+      seriesWheel.style.transform = `rotate(${-active * step}deg)`;
     }
+    $$('.series-dot', dialNodes).forEach((dot) => {
+      dot.style.setProperty('--counter-rotation', `${active * step}deg`);
+    });
     $('#seriesTotal').textContent = `${series.length} 个系列`;
     $('#seriesPageTotal').textContent = `${series.reduce((sum, item) => sum + item.pages.length, 0)} 个产品页`;
   }
@@ -157,7 +163,7 @@
   function productMarkup(model, item, page) {
     const specs = page.specs || [];
     const keySpecs = specs.slice(0, 3);
-    const image = `${model.crop || page.image}?v=20261119d`;
+    const image = `${model.crop || page.image}?v=20261119e`;
     const fallback = model.fallback ? ' / 本页总览' : '';
     return `
       <article class="product-card">

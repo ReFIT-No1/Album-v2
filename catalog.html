@@ -8,8 +8,8 @@
   <title>千寻电气 · 产品目录</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261119d">
-  <link rel="stylesheet" href="catalog.css?v=20261119d">
+  <link rel="stylesheet" href="styles.css?v=20261119e">
+  <link rel="stylesheet" href="catalog.css?v=20261119e">
 </head>
 <body class="catalog-body">
   <div class="app catalog-app" id="catalogApp">
@@ -58,16 +58,20 @@
           <p>转动转盘，查看对应产品。</p>
         </div>
 
-        <div class="series-dial" id="seriesDial">
-          <div class="series-dial__orbit series-dial__orbit--outer" aria-hidden="true"></div>
-          <div class="series-dial__orbit series-dial__orbit--inner" aria-hidden="true"></div>
-          <div class="series-dial__ticks" id="seriesDialTicks" aria-hidden="true"></div>
-          <div class="series-dial__nodes" id="seriesDialNodes"></div>
-          <div class="series-dial__center">
-            <span class="series-dial__count" id="dialCount">01 / 34</span>
-            <strong class="series-dial__name" id="dialName">蒸汽开关系列</strong>
-            <span class="series-dial__range" id="dialRange">印刷页 01</span>
+        <div class="series-dial series-dial--half" id="seriesDial">
+          <div class="series-dial__wheel" id="seriesWheel">
+            <div class="series-dial__orbit series-dial__orbit--outer" aria-hidden="true"></div>
+            <div class="series-dial__orbit series-dial__orbit--inner" aria-hidden="true"></div>
+            <div class="series-dial__ticks" id="seriesDialTicks" aria-hidden="true"></div>
+            <div class="series-dial__nodes" id="seriesDialNodes"></div>
           </div>
+          <span class="series-dial__marker" aria-hidden="true"></span>
+        </div>
+
+        <div class="series-dial__readout">
+          <span class="series-dial__count" id="dialCount">01 / 34</span>
+          <strong class="series-dial__name" id="dialName">蒸汽开关系列</strong>
+          <span class="series-dial__range" id="dialRange">印刷页 01</span>
         </div>
 
         <div class="series-dial__controls">
@@ -208,7 +212,7 @@
   <div class="sr-only" id="catalogLive" aria-live="polite"></div>
 
   <noscript><div class="noscript">请启用 JavaScript 后查看产品目录。</div></noscript>
-  <script src="data/catalog-data.js?v=20261119d"></script>
-  <script src="catalog.js?v=20261119d"></script>
+  <script src="data/catalog-data.js?v=20261119e"></script>
+  <script src="catalog.js?v=20261119e"></script>
 </body>
 </html>
