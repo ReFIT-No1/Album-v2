@@ -1503,3 +1503,32 @@
 .thumb-card.is-active:hover {
   border-color: rgba(155, 232, 255, .9);
 }
+
+/* Stronger focus zoom: hovered card grows, all sibling cards recede */
+.series-combos:has(.thumb-card:hover) .thumb-card:not(:hover) {
+  transform: scale(.90);
+  opacity: .72;
+  filter: saturate(.82) brightness(.9);
+}
+
+.thumb-card:hover,
+.thumb-card:focus-visible {
+  z-index: 8;
+  transform: translateY(-9px) scale(1.22);
+  border-color: rgba(162, 233, 255, .95);
+  background: rgba(42, 119, 174, .26);
+  box-shadow:
+    0 0 0 1px rgba(115, 211, 255, .2),
+    0 20px 44px rgba(0, 0, 0, .42),
+    0 0 34px rgba(53, 169, 238, .22);
+}
+
+.thumb-card:hover .thumb-visual img,
+.thumb-card:focus-visible .thumb-visual img {
+  transform: scale(1.14);
+}
+
+.thumb-card:hover .thumb-model,
+.thumb-card:focus-visible .thumb-model {
+  color: #ffffff;
+}
