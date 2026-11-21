@@ -1030,3 +1030,107 @@
   .param-label { font-size: 7.5px; }
   .param-value { font-size: 9px; max-width: 120px; }
 }
+
+/* Certifications beside the logo */
+.brand-certs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 15px;
+  margin-right: auto;
+  padding-left: 14px;
+  border-left: 1px solid rgba(142, 190, 240, .16);
+  white-space: nowrap;
+}
+
+.brand-certs__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 2px;
+  color: #8ec8ef;
+  font-size: 7.5px;
+  letter-spacing: .12em;
+}
+
+.brand-certs__title svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: #72c7ff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cert-pill {
+  display: inline-flex;
+  height: 20px;
+  align-items: center;
+  padding: 0 6px;
+  border: 1px solid rgba(117, 190, 246, .28);
+  border-radius: 4px;
+  color: #c4e8ff;
+  background:
+    linear-gradient(180deg, rgba(67, 151, 218, .16), rgba(27, 76, 122, .12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+  font-family: var(--font-num, "Segoe UI", Arial, sans-serif);
+  font-size: 6.5px;
+  font-weight: 600;
+  letter-spacing: .035em;
+}
+
+.cert-pill:nth-child(3n) {
+  border-color: rgba(238, 196, 108, .34);
+  color: #ffdf9b;
+  background: rgba(132, 92, 26, .15);
+}
+
+.series-nav__item {
+  min-height: 34px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.series-nav__name {
+  white-space: nowrap;
+}
+
+@media (max-width: 1240px) {
+  .brand-certs { margin-left: 10px; padding-left: 10px; gap: 3px; }
+  .brand-certs__title { display: none; }
+  .cert-pill { height: 21px; padding: 0 5px; font-size: 6.5px; }
+}
+
+@media (max-width: 1060px) {
+  .brand-certs { margin-left: 7px; padding-left: 7px; gap: 2px; }
+  .cert-pill { height: 19px; padding: 0 4px; font-size: 6px; }
+}
+
+.brand-certs {
+  position: relative;
+  z-index: 4;
+}
+
+/* Make the company certification strip clearly legible beside the logo */
+.brand-certs { gap: 5px; }
+.brand-certs__title { font-size: 8px; letter-spacing: .14em; }
+.brand-certs__title svg { width: 13px; height: 13px; }
+.cert-pill {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 2px 8px rgba(0, 0, 0, .12);
+}
+
+@media (max-width: 1240px) {
+  .cert-pill { height: 21px; padding: 0 5px; font-size: 6.5px; }
+}
+
+@media (max-width: 1060px) {
+  .cert-pill { height: 19px; padding: 0 4px; font-size: 6px; }
+}

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   const DATA = window.QIANXUN_AB;
@@ -113,7 +113,6 @@
         <span class="series-nav__num">${pad2(item.number)}</span>
         <span>
           <span class="series-nav__name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
-          <span class="series-nav__range">印刷页 ${pageRange(item)} · ${seriesModelCount(item)} 型号</span>
         </span>
       `;
       button.addEventListener('click', () => selectSeries(index));
@@ -137,14 +136,6 @@
     const isA = part === 'A';
     return `
       <section class="product-group product-group--${isA ? 'a' : 'b'}" aria-label="${isA ? 'A 主产品' : 'B 配套产品'}">
-        <div class="group-head">
-          <span class="group-letter">${part}</span>
-          <div class="group-title">
-            <strong>${isA ? 'A · 主产品' : 'B · 配套产品'}</strong>
-            <span>${isA ? 'PRIMARY PRODUCTS' : 'MATCHING PRODUCTS'}</span>
-          </div>
-          <span class="group-count">${models.length} 个型号</span>
-        </div>
         <div class="thumb-grid">
           ${models.map((model) => `
             <button class="thumb-card" type="button" data-model-id="${model.id}" aria-pressed="false" aria-label="${escapeHtml(model.name)}">
@@ -179,8 +170,6 @@
 
     $('#seriesKicker').textContent = `SERIES ${pad2(item.number)}`;
     $('#seriesTitle').textContent = item.name;
-    $('#seriesSubtitle').textContent = `A + B 产品组合 · 印刷页 ${pageRange(item)} · ${totalModels} 个型号`;
-    $('#seriesPageCount').textContent = item.start == null ? 'A + B' : `${pad2(item.start)} — ${pad2(item.end)}`;
     combosRoot.innerHTML = item.combos.map((combo, comboIndex) => comboMarkup(combo, comboIndex, item.combos.length)).join('');
 
     $$('.thumb-card', combosRoot).forEach((card) => {
@@ -238,7 +227,6 @@
     }
     const item = series[model.seriesIndex];
     const specs = model.specs || [];
-    const certs = model.certs || [];
     const partLabel = model.part === 'A' ? 'A · 主产品' : 'B · 配套产品';
     const partClass = model.part === 'A' ? 'detail-badge--a' : 'detail-badge--b';
     const pageLabel = model.page != null ? `印刷页 ${pad2(model.page)}` : '系列参数';
@@ -272,22 +260,7 @@
         ` : '<div class="detail-empty">该型号暂无独立参数。</div>'}
       </div>
 
-      ${certs.length ? `
-        <div class="detail-section">
-          <div class="detail-section__head">
-            <strong>认证</strong>
-            <span>CERTIFICATIONS</span>
-          </div>
-          <div class="detail-certs">
-            ${certs.map((cert) => `<span class="detail-cert">${icon('cert')}${escapeHtml(cert)}</span>`).join('')}
-          </div>
-        </div>
-      ` : ''}
 
-      <div class="detail-hint">
-        ${icon('info')}
-        <span>参数对应本型号所在图册页；A / B 组合按选型表排列。</span>
-      </div>
     `;
 
     $$('.thumb-card', combosRoot).forEach((card) => {

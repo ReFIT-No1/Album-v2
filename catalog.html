@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css?v=20261119f">
-  <link rel="stylesheet" href="catalog.css?v=20261121a">
+  <link rel="stylesheet" href="catalog.css?v=20261121b">
 </head>
 <body class="catalog-body">
   <div class="app catalog-app" id="catalogApp">
@@ -31,6 +31,20 @@
           <span class="brand-cn">千寻电气 <i></i> 产品目录</span>
         </span>
       </a>
+
+      <div class="brand-certs" aria-label="认证">
+        <span class="brand-certs__title">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.3-2.8 7-7 9-4.2-2-7-4.7-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+          认证
+        </span>
+        <span class="cert-pill">CCC</span>
+        <span class="cert-pill">CQC</span>
+        <span class="cert-pill">TÜV</span>
+        <span class="cert-pill">CE</span>
+        <span class="cert-pill">CB</span>
+        <span class="cert-pill">UL</span>
+        <span class="cert-pill">ISO 9001</span>
+      </div>
 
       <nav class="top-actions catalog-actions" aria-label="目录工具">
         <button class="tool-btn tool-btn--text" id="catalogSearchBtn" type="button" aria-label="搜索产品型号或系列" title="搜索（/）">
@@ -72,11 +86,6 @@
           <div class="series-head__copy">
             <div class="catalog-eyebrow" id="seriesKicker">SERIES 01</div>
             <h2 class="series-title" id="seriesTitle">蒸汽开关系列</h2>
-            <p class="series-subtitle" id="seriesSubtitle"></p>
-          </div>
-          <div class="series-head__meta">
-            <span id="seriesPageCount">01 — 01</span>
-            <span>A + B PRODUCT SYSTEM</span>
           </div>
         </header>
 
@@ -84,11 +93,6 @@
           <div class="series-combos" id="seriesCombos"></div>
           <aside class="model-detail" id="modelDetail" aria-label="选中型号参数" aria-live="polite"></aside>
         </div>
-
-        <footer class="series-stage__foot">
-          <span>千寻电气 · 温州千寻电气科技有限公司</span>
-          <a href="index.html?book=1">查看原版翻页图册</a>
-        </footer>
       </section>
     </main>
 
@@ -180,7 +184,7 @@
   <div class="sr-only" id="catalogLive" aria-live="polite"></div>
 
   <noscript><div class="noscript">请启用 JavaScript 后查看产品目录。</div></noscript>
-  <script src="data/catalog-ab.js?v=20261121a"></script>
-  <script src="catalog.js?v=20261121a"></script>
+  <script src="data/catalog-ab.js?v=20261121b"></script>
+  <script src="catalog.js?v=20261121b"></script>
 </body>
 </html>
