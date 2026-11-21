@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050b14">
-  <meta name="description" content="千寻电气产品目录：按系列浏览产品、型号与技术参数。">
+  <meta name="description" content="千寻电气产品目录：按系列浏览 A/B 产品组合、型号与技术参数。">
   <title>千寻电气 · 产品目录</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 9 51 20v24L32 55 13 44V20z' fill='none' stroke='%234aa8ff' stroke-width='2.5'/%3E%3Ccircle cx='31' cy='31' r='9' fill='none' stroke='%23c7e7ff' stroke-width='3'/%3E%3Cpath d='m37 38 7 7' stroke='%23c7e7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" as="image" href="assets/brand/chaser-logo.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css?v=20261119f">
-  <link rel="stylesheet" href="catalog.css?v=20261119f">
+  <link rel="stylesheet" href="catalog.css?v=20261121a">
 </head>
 <body class="catalog-body">
   <div class="app catalog-app" id="catalogApp">
@@ -51,59 +51,40 @@
     </header>
 
     <main class="catalog-main" id="catalogMain">
-      <aside class="series-panel" aria-label="系列导航">
+      <aside class="series-panel" aria-label="系列目录">
         <div class="series-panel__head">
           <span class="catalog-eyebrow">PRODUCT SERIES</span>
-          <h1>系列导航</h1>
-          <p>转动转盘，查看对应产品。</p>
+          <h1>系列目录</h1>
+          <p>选择系列，查看 A / B 产品组合。</p>
         </div>
 
-        <div class="series-dial series-dial--half" id="seriesDial">
-          <div class="series-dial__wheel" id="seriesWheel">
-            <div class="series-dial__orbit series-dial__orbit--outer" aria-hidden="true"></div>
-            <div class="series-dial__orbit series-dial__orbit--inner" aria-hidden="true"></div>
-            <div class="series-dial__ticks" id="seriesDialTicks" aria-hidden="true"></div>
-            <div class="series-dial__nodes" id="seriesDialNodes"></div>
-          </div>
-          <span class="series-dial__marker" aria-hidden="true"></span>
-        </div>
-
-        <div class="series-dial__readout">
-          <span class="series-dial__count" id="dialCount">01 / 34</span>
-          <strong class="series-dial__name" id="dialName">蒸汽开关系列</strong>
-          <span class="series-dial__range" id="dialRange">印刷页 01</span>
-        </div>
-
-        <div class="series-dial__controls">
-          <button class="catalog-arrow" id="prevSeries" type="button" aria-label="上一个系列">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.8-6.2 6.2 6.2 6.2"/></svg>
-          </button>
-          <span class="series-dial__hint">点击圆点切换</span>
-          <button class="catalog-arrow" id="nextSeries" type="button" aria-label="下一个系列">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5.8 6.2 6.2-6.2 6.2"/></svg>
-          </button>
-        </div>
+        <nav class="series-nav" id="seriesNav" aria-label="产品系列列表"></nav>
 
         <div class="series-panel__foot">
           <span id="seriesTotal">34 个系列</span>
           <span>·</span>
-          <span id="seriesPageTotal">63 个产品页</span>
+          <span id="modelTotal">168 个型号</span>
         </div>
       </aside>
 
       <section class="series-stage" id="seriesStage" aria-live="polite">
         <header class="series-head">
-          <div>
+          <div class="series-head__copy">
             <div class="catalog-eyebrow" id="seriesKicker">SERIES 01</div>
             <h2 class="series-title" id="seriesTitle">蒸汽开关系列</h2>
-            <p class="series-subtitle" id="seriesSubtitle">印刷页 01 · 1 个产品页</p>
+            <p class="series-subtitle" id="seriesSubtitle"></p>
           </div>
           <div class="series-head__meta">
             <span id="seriesPageCount">01 — 01</span>
-            <span>PRODUCT CATALOGUE</span>
+            <span>A + B PRODUCT SYSTEM</span>
           </div>
         </header>
-        <div class="series-pages" id="seriesPages"></div>
+
+        <div class="series-workbench">
+          <div class="series-combos" id="seriesCombos"></div>
+          <aside class="model-detail" id="modelDetail" aria-label="选中型号参数" aria-live="polite"></aside>
+        </div>
+
         <footer class="series-stage__foot">
           <span>千寻电气 · 温州千寻电气科技有限公司</span>
           <a href="index.html?book=1">查看原版翻页图册</a>
@@ -145,7 +126,7 @@
       </div>
       <div class="catalog-search-box">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.3 4.3"/></svg>
-        <input id="catalogSearchInput" type="search" placeholder="输入型号、系列名，例如 QX198A / 温控器" autocomplete="off" spellcheck="false">
+        <input id="catalogSearchInput" type="search" placeholder="输入型号、系列名，例如 QX188A / 蒸汽开关" autocomplete="off" spellcheck="false">
         <kbd>/</kbd>
       </div>
       <div class="catalog-search-results" id="catalogSearchResults" role="listbox"></div>
@@ -186,25 +167,12 @@
         <button class="catalog-modal__close" type="button" data-close="catalogHelpModal" aria-label="关闭说明">×</button>
       </div>
       <div class="catalog-help-list">
-        <div><b>左侧转盘</b><span>点击圆点或左右按钮切换产品系列。</span></div>
-        <div><b>产品卡片</b><span>每个型号单独展示，参数集中在本页下方。</span></div>
-        <div><b>查看原页</b><span>点击“查看原始版面”可打开原图册页面。</span></div>
+        <div><b>左侧系列</b><span>点击系列名称切换目录内容。</span></div>
+        <div><b>A + B 组合</b><span>A 区在上，B 区在下；灰色缩略卡只展示产品图和型号。</span></div>
+        <div><b>参数</b><span>点击任意 A / B 型号，右侧显示该型号对应的参数和图标。</span></div>
         <div><b>搜索</b><span>按 / 打开搜索，支持系列名、型号和参数关键词。</span></div>
         <div><b>Esc</b><span>关闭搜索、分享和说明弹窗。</span></div>
       </div>
-    </div>
-  </div>
-
-  <div class="catalog-modal" id="catalogOriginalModal" role="dialog" aria-modal="true" aria-labelledby="catalogOriginalTitle" aria-hidden="true">
-    <div class="catalog-modal__card catalog-original-card">
-      <div class="catalog-modal__head">
-        <div>
-          <span class="catalog-eyebrow">ORIGINAL PAGE</span>
-          <h2 id="catalogOriginalTitle">原始版面</h2>
-        </div>
-        <button class="catalog-modal__close" type="button" data-close="catalogOriginalModal" aria-label="关闭原始版面">×</button>
-      </div>
-      <div class="catalog-original-stage"><img id="catalogOriginalImg" alt=""></div>
     </div>
   </div>
 
@@ -212,7 +180,7 @@
   <div class="sr-only" id="catalogLive" aria-live="polite"></div>
 
   <noscript><div class="noscript">请启用 JavaScript 后查看产品目录。</div></noscript>
-  <script src="data/catalog-data.js?v=20261119f"></script>
-  <script src="catalog.js?v=20261119f"></script>
+  <script src="data/catalog-ab.js?v=20261121a"></script>
+  <script src="catalog.js?v=20261121a"></script>
 </body>
 </html>

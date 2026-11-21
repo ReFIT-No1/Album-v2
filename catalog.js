@@ -1,30 +1,53 @@
-﻿(function () {
+(function () {
   'use strict';
 
-  const DATA = window.QIANXUN_CATALOG;
+  const DATA = window.QIANXUN_AB;
   if (!DATA || !Array.isArray(DATA.series) || !DATA.series.length) return;
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const series = DATA.series;
-  const DEFAULT_CERTS = ['CCC', 'CQC', 'TÜV', 'CE', 'CB', 'UL', 'ISO'];
-  const dial = $('#seriesDial');
-  const seriesWheel = $('#seriesWheel');
-  const dialNodes = $('#seriesDialNodes');
+  const nav = $('#seriesNav');
   const stage = $('#seriesStage');
-  const pagesRoot = $('#seriesPages');
-  let active = 0;
-  let selectedModel = null;
+  const combosRoot = $('#seriesCombos');
+  const detailRoot = $('#modelDetail');
+  let activeSeries = 0;
+  let activeModelId = null;
+  const modelById = new Map();
+  const searchItems = [];
 
   const toast = $('#catalogToast');
   let toastTimer = 0;
 
-  function showToast(message, duration = 1800) {
-    if (!toast) return;
-    toast.textContent = message;
-    toast.classList.add('is-show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('is-show'), duration);
+  const ICONS = {
+    voltage: '<path d="M13 2 4.5 13.5H10l-1 8.5 8.5-11H12z"/>',
+    current: '<path d="M7 7h10v10H7z"/><path d="M4 12h3m10 0h3M9 4v3m6-3v3M9 17v3m6-3v3"/>',
+    frequency: '<path d="M3 12c2.5-5 4.5-5 7 0s4.5 5 7 0 3.5-3 4 0"/><path d="M3 18h18"/>',
+    resistance: '<path d="M4 12h4l2-5 4 10 2-5h4"/><path d="M4 4v16M20 4v16"/>',
+    shield: '<path d="M12 3 20 6v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/><path d="m8.5 12 2.3 2.3 4.7-5"/>',
+    thermometer: '<path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 9v7"/>',
+    flame: '<path d="M12 3c1.7 3.2 1 5.1-.4 6.5-1.2 1.2-1.6 2.3-.8 3.7 2.2-.3 3.4-2.1 3.3-4.4 2.8 2.2 4.5 4.4 4.4 7A6.5 6.5 0 0 1 12 22a6.5 6.5 0 0 1-6.5-6.2c0-3.8 2.8-6.3 4.2-7.5C10.9 6.9 12.2 4.7 12 3z"/>',
+    droplet: '<path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z"/><path d="M9 14.5a3 3 0 0 0 6 0"/>',
+    power: '<path d="M12 3v9"/><path d="M7.1 5.5a8 8 0 1 0 9.8 0"/>',
+    info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 10.5v5M12 7.5h.01"/>',
+    cert: '<path d="M12 3 19 6v5c0 4.3-2.8 7-7 9-4.2-2-7-4.7-7-9V6z"/><path d="m9 12 2 2 4-4"/>'
+  };
+
+  function icon(key) {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[key] || ICONS.info}</svg>`;
+  }
+
+  function iconForLabel(label) {
+    const value = String(label || '');
+    if (value.includes('电压')) return 'voltage';
+    if (value.includes('电流')) return 'current';
+    if (value.includes('频率')) return 'frequency';
+    if (value.includes('电阻')) return 'resistance';
+    if (value.includes('温度') || value.includes('蒸汽')) return 'thermometer';
+    if (value.includes('耐压') || value.includes('防护')) return 'shield';
+    if (value.includes('功率')) return 'power';
+    if (value.includes('保护')) return 'flame';
+    return 'info';
   }
 
   function escapeHtml(value) {
@@ -36,208 +59,244 @@
       .replace(/'/g, '&#39;');
   }
 
-  function pad2(number) {
-    return String(number).padStart(2, '0');
+  function pad2(value) {
+    return String(value == null ? '' : value).padStart(2, '0');
   }
 
   function pageRange(item) {
+    if (item.start == null || item.end == null) return '—';
     return item.start === item.end ? pad2(item.start) : `${pad2(item.start)}–${pad2(item.end)}`;
   }
 
-  function modelSearchText(model) {
-    return [model.name, model.crop].filter(Boolean).join(' ');
+  function normalize(value) {
+    return String(value || '').toLowerCase().replace(/[\s\-—–_/（）()·,，.。:：]+/g, '');
   }
 
-  function filterModels(models) {
-    const list = (models || []).filter((model) => model && model.name);
-    const normalized = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
-    return list.filter((model) => {
-      const key = normalized(model.name);
-      return !list.some((other) => {
-        if (!other || other === model) return false;
-        const otherKey = normalized(other.name);
-        return otherKey.length > key.length + 1 && otherKey.startsWith(key);
+  function seriesModelCount(item) {
+    return item.combos.reduce((sum, combo) => sum + combo.a.length + combo.b.length, 0);
+  }
+
+  function showToast(message, duration = 1800) {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('is-show'), duration);
+  }
+
+  /* ---------- data IDs and navigation ---------- */
+
+  series.forEach((item, seriesIndex) => {
+    item.combos.forEach((combo, comboIndex) => {
+      ['a', 'b'].forEach((part) => {
+        combo[part].forEach((model, modelIndex) => {
+          model.id = `s${seriesIndex}-c${comboIndex}-${part}-${modelIndex}`;
+          model.seriesIndex = seriesIndex;
+          model.comboIndex = comboIndex;
+          model.part = part.toUpperCase();
+          model.seriesName = item.name;
+          modelById.set(model.id, model);
+        });
       });
     });
-  }
+  });
 
-  function buildDial() {
-    dialNodes.replaceChildren();
+  function buildNav() {
+    nav.replaceChildren();
     series.forEach((item, index) => {
-      const dot = document.createElement('button');
-      dot.type = 'button';
-      dot.className = 'series-dot';
-      dot.dataset.index = String(index);
-      dot.setAttribute('aria-label', `${pad2(item.number)} ${item.name}，印刷页 ${pageRange(item)}`);
-      dot.title = `${pad2(item.number)} ${item.name}`;
-      const label = document.createElement('span');
-      label.className = 'series-dot__label';
-      label.textContent = item.name;
-      dot.appendChild(label);
-      const number = document.createElement('span');
-      number.className = 'series-dot__num';
-      number.textContent = pad2(item.number);
-      dot.appendChild(number);
-      dot.addEventListener('click', () => selectSeries(index));
-      dialNodes.appendChild(dot);
-    });
-    positionDialNodes();
-  }
-
-  function dialGeometry() {
-    const element = seriesWheel || dial;
-    const width = element ? element.clientWidth : 520;
-    const height = element ? element.clientHeight : 520;
-    return {
-      radius: Math.max(160, Math.min(width, height) / 2 - 60),
-      cx: width / 2,
-      cy: height / 2
-    };
-  }
-
-  function positionDialNodes() {
-    const { radius, cx, cy } = dialGeometry();
-    const count = series.length;
-    $$('.series-dot', dialNodes).forEach((dot, index) => {
-      const angle = (index / count) * Math.PI * 2;
-      dot.style.left = `${cx + Math.cos(angle) * radius}px`;
-      dot.style.top = `${cy + Math.sin(angle) * radius}px`;
-    });
-  }
-
-  function showDialPreview(index) {
-    const item = series[index];
-    if (!item) return;
-    const name = $('#dialName');
-    const count = $('#dialCount');
-    const range = $('#dialRange');
-    if (name) name.textContent = item.name;
-    if (count) count.textContent = `${pad2(item.number)} / ${series.length}`;
-    if (range) range.textContent = `印刷页 ${pageRange(item)}`;
-  }
-
-  function updateDial() {
-    $$('.series-dot', dialNodes).forEach((dot, index) => {
-      dot.classList.toggle('is-active', index === active);
-      dot.setAttribute('aria-current', index === active ? 'true' : 'false');
-    });
-    showDialPreview(active);
-    const step = 360 / series.length;
-    if (seriesWheel) {
-      seriesWheel.style.transform = `rotate(${-active * step}deg)`;
-    }
-    $$('.series-dot', dialNodes).forEach((dot) => {
-      dot.style.setProperty('--counter-rotation', `${active * step}deg`);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'series-nav__item';
+      button.dataset.index = String(index);
+      button.setAttribute('aria-current', 'false');
+      button.innerHTML = `
+        <span class="series-nav__num">${pad2(item.number)}</span>
+        <span>
+          <span class="series-nav__name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+          <span class="series-nav__range">印刷页 ${pageRange(item)} · ${seriesModelCount(item)} 型号</span>
+        </span>
+      `;
+      button.addEventListener('click', () => selectSeries(index));
+      nav.appendChild(button);
     });
     $('#seriesTotal').textContent = `${series.length} 个系列`;
-    $('#seriesPageTotal').textContent = `${series.reduce((sum, item) => sum + item.pages.length, 0)} 个产品页`;
+    $('#modelTotal').textContent = `${modelById.size} 个型号`;
   }
 
-  function specMarkup(specs, shared) {
-    if (!specs || !specs.length) return '';
+  function updateNav() {
+    $$('.series-nav__item', nav).forEach((item, index) => {
+      item.classList.toggle('is-active', index === activeSeries);
+      item.setAttribute('aria-current', index === activeSeries ? 'true' : 'false');
+    });
+  }
+
+  /* ---------- thumbnails ---------- */
+
+  function groupMarkup(part, models, comboIndex, comboCount) {
+    if (!models.length) return '';
+    const isA = part === 'A';
     return `
-      <section class="spec-panel" aria-label="技术参数">
-        <div class="spec-panel__head">
-          <strong>技术参数</strong>
-          <span>${shared ? '系列通用参数' : '本页参数'} · TECHNICAL SPECIFICATIONS</span>
+      <section class="product-group product-group--${isA ? 'a' : 'b'}" aria-label="${isA ? 'A 主产品' : 'B 配套产品'}">
+        <div class="group-head">
+          <span class="group-letter">${part}</span>
+          <div class="group-title">
+            <strong>${isA ? 'A · 主产品' : 'B · 配套产品'}</strong>
+            <span>${isA ? 'PRIMARY PRODUCTS' : 'MATCHING PRODUCTS'}</span>
+          </div>
+          <span class="group-count">${models.length} 个型号</span>
         </div>
-        <div class="spec-grid">
-          ${specs.map((spec) => `
-            <div class="spec-item">
-              <span class="spec-item__label">${escapeHtml(spec.label)}</span>
-              <strong class="spec-item__value">${escapeHtml(spec.value)}</strong>
-            </div>
+        <div class="thumb-grid">
+          ${models.map((model) => `
+            <button class="thumb-card" type="button" data-model-id="${model.id}" aria-pressed="false" aria-label="${escapeHtml(model.name)}">
+              <span class="thumb-visual">
+                ${model.render
+                  ? `<img src="${escapeHtml(model.render)}" alt="${escapeHtml(model.name)}" loading="eager" decoding="async">`
+                  : '<span class="thumb-missing">暂无产品图</span>'}
+              </span>
+              <span class="thumb-model">${escapeHtml(model.name)}</span>
+            </button>
           `).join('')}
         </div>
       </section>
     `;
   }
 
-  function certsMarkup(certs) {
-    const all = Array.from(new Set([...DEFAULT_CERTS, ...(certs || [])]));
-    return `<div class="cert-row">${all.map((cert) => `<span class="cert-chip">${escapeHtml(cert)}</span>`).join('')}</div>`;
-  }
-
-  function productMarkup(model, item, page) {
-    const specs = page.specs || [];
-    const keySpecs = specs.slice(0, 3);
-    const image = `${model.crop || page.image}?v=20261119f`;
-    const fallback = model.fallback ? ' / 本页总览' : '';
+  function comboMarkup(combo, comboIndex, comboCount) {
     return `
-      <article class="product-card">
-        <div class="product-visual">
-          <img src="${escapeHtml(image)}" alt="${escapeHtml(model.name)}" decoding="async">
-          <span class="product-visual__page">P${pad2(page.page)}</span>
-        </div>
-        <div class="product-body">
-          <strong class="product-model" title="${escapeHtml(model.name)}">${escapeHtml(model.name)}</strong>
-          <span class="product-series">${escapeHtml(item.name)}${fallback}</span>
-          <div class="product-key-specs">
-            ${keySpecs.map((spec) => `<span title="${escapeHtml(spec.label)}：${escapeHtml(spec.value)}">${escapeHtml(spec.label)} ${escapeHtml(spec.value)}</span>`).join('')}
-          </div>
-          <div class="product-actions">
-            <button class="product-original" type="button" data-original="${page.image}" data-original-title="${escapeHtml(page.title)}">查看原始版面</button>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  function sourceColumnMarkup(item, page) {
-    const ocrText = (page.ocr || []).filter(Boolean).join('\n');
-    return `
-      <section class="source-column" aria-label="产品页 ${page.page}">
-        <div class="source-column__head">
-          <span class="source-column__page">产品页 ${pad2(page.printed)}</span>
-          <span class="source-column__meta">P${pad2(page.page)} · ${pad2(page.printed)} / ${pad2(item.end)}</span>
-        </div>
-        <p class="page-title">${escapeHtml(page.title)}</p>
-        ${certsMarkup(page.certs)}
-        ${specMarkup(page.specs, page.specsShared)}
-        <div class="product-list">
-          ${filterModels(page.models).map((model) => productMarkup(model, item, page)).join('')}
-        </div>
-        <details class="page-ocr">
-          <summary>本页完整文字信息</summary>
-          <pre class="page-ocr__text">${escapeHtml(ocrText)}</pre>
-        </details>
+      <section class="combo-block" aria-label="A+B 组合 ${comboIndex + 1}">
+        ${comboCount > 1 ? `<div class="combo-label">组合 ${pad2(comboIndex + 1)} / ${pad2(comboCount)}</div>` : ''}
+        ${groupMarkup('A', combo.a, comboIndex, comboCount)}
+        ${groupMarkup('B', combo.b, comboIndex, comboCount)}
       </section>
     `;
   }
 
   function renderSeries(index, options = {}) {
-    active = Math.max(0, Math.min(series.length - 1, Number(index) || 0));
-    const item = series[active];
-    updateDial();
+    activeSeries = Math.max(0, Math.min(series.length - 1, Number(index) || 0));
+    const item = series[activeSeries];
+    const totalModels = seriesModelCount(item);
+    updateNav();
 
     $('#seriesKicker').textContent = `SERIES ${pad2(item.number)}`;
     $('#seriesTitle').textContent = item.name;
-    $('#seriesSubtitle').textContent = `印刷页 ${pageRange(item)} · ${item.pages.length} 个产品页`;
-    $('#seriesPageCount').textContent = `${pad2(item.start)} — ${pad2(item.end)}`;
-    pagesRoot.classList.toggle('is-single', item.pages.length === 1);
-    pagesRoot.innerHTML = item.pages.map((page) => sourceColumnMarkup(item, page)).join('');
+    $('#seriesSubtitle').textContent = `A + B 产品组合 · 印刷页 ${pageRange(item)} · ${totalModels} 个型号`;
+    $('#seriesPageCount').textContent = item.start == null ? 'A + B' : `${pad2(item.start)} — ${pad2(item.end)}`;
+    combosRoot.innerHTML = item.combos.map((combo, comboIndex) => comboMarkup(combo, comboIndex, item.combos.length)).join('');
 
-    $$('.product-original', pagesRoot).forEach((button) => {
-      button.addEventListener('click', () => openOriginal(button.dataset.original, button.dataset.originalTitle));
+    $$('.thumb-card', combosRoot).forEach((card) => {
+      card.addEventListener('click', () => selectModel(card.dataset.modelId));
     });
 
-    if (options.scroll !== false) stage.scrollTop = 0;
+    const firstModel = item.combos.flatMap((combo) => [...combo.a, ...combo.b])[0];
+    const preferred = options.modelId && modelById.has(options.modelId) ? options.modelId : (firstModel ? firstModel.id : null);
+    renderDetail(preferred);
+    if (preferred) setActiveCard(preferred);
+
+    stage.scrollTop = 0;
     if (options.hash !== false) {
       history.replaceState(null, '', `#series-${pad2(item.number)}`);
     }
-    $('#catalogLive').textContent = `已切换到 ${item.name}，${item.pages.length} 个产品页`;
+    $('#catalogLive').textContent = `已切换到 ${item.name}，${item.combos.length} 个 A+B 组合`;
+  }
+
+  function setActiveCard(modelId) {
+    activeModelId = modelId;
+    $$('.thumb-card', combosRoot).forEach((card) => {
+      const isActive = card.dataset.modelId === modelId;
+      card.classList.toggle('is-active', isActive);
+      card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function selectModel(modelId, options = {}) {
+    if (!modelById.has(modelId)) return;
+    setActiveCard(modelId);
+    renderDetail(modelId);
+    if (options.focus !== false) {
+      const card = $(`.thumb-card[data-model-id="${modelId}"]`, combosRoot);
+      if (card) card.focus({ preventScroll: true });
+    }
+    $('#catalogLive').textContent = `已选择 ${modelById.get(modelId).name}`;
   }
 
   function selectSeries(index, options = {}) {
-    const next = (index + series.length) % series.length;
-    renderSeries(next, options);
+    const item = series[(index + series.length) % series.length];
+    renderSeries(series.indexOf(item), options);
   }
 
   function stepSeries(direction) {
-    selectSeries(active + direction);
+    selectSeries(activeSeries + direction);
   }
 
-  /* ---------- Modals ---------- */
+  /* ---------- detail parameters ---------- */
+
+  function renderDetail(modelId) {
+    const model = modelById.get(modelId);
+    if (!model) {
+      detailRoot.innerHTML = '<div class="detail-empty">请选择一个 A / B 型号查看参数。</div>';
+      return;
+    }
+    const item = series[model.seriesIndex];
+    const specs = model.specs || [];
+    const certs = model.certs || [];
+    const partLabel = model.part === 'A' ? 'A · 主产品' : 'B · 配套产品';
+    const partClass = model.part === 'A' ? 'detail-badge--a' : 'detail-badge--b';
+    const pageLabel = model.page != null ? `印刷页 ${pad2(model.page)}` : '系列参数';
+
+    detailRoot.innerHTML = `
+      <div class="detail-eyebrow">
+        <span>SELECTED MODEL</span>
+        <span>${escapeHtml(model.part)} / ${escapeHtml(pageLabel)}</span>
+      </div>
+      <h3 class="detail-title">${escapeHtml(model.name)}</h3>
+      <div class="detail-badges">
+        <span class="detail-badge ${partClass}">${partLabel}</span>
+        <span class="detail-badge">${escapeHtml(item.name)}</span>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section__head">
+          <strong>技术参数</strong>
+          <span>MODEL PARAMETERS</span>
+        </div>
+        ${specs.length ? `
+          <div class="param-list">
+            ${specs.map((spec) => `
+              <div class="param-row">
+                <span class="param-icon">${icon(iconForLabel(spec.label))}</span>
+                <span class="param-label" title="${escapeHtml(spec.label)}">${escapeHtml(spec.label)}</span>
+                <strong class="param-value">${escapeHtml(spec.value)}</strong>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<div class="detail-empty">该型号暂无独立参数。</div>'}
+      </div>
+
+      ${certs.length ? `
+        <div class="detail-section">
+          <div class="detail-section__head">
+            <strong>认证</strong>
+            <span>CERTIFICATIONS</span>
+          </div>
+          <div class="detail-certs">
+            ${certs.map((cert) => `<span class="detail-cert">${icon('cert')}${escapeHtml(cert)}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="detail-hint">
+        ${icon('info')}
+        <span>参数对应本型号所在图册页；A / B 组合按选型表排列。</span>
+      </div>
+    `;
+
+    $$('.thumb-card', combosRoot).forEach((card) => {
+      card.classList.toggle('is-active', card.dataset.modelId === modelId);
+      card.setAttribute('aria-pressed', card.dataset.modelId === modelId ? 'true' : 'false');
+    });
+  }
+
+  /* ---------- modals ---------- */
 
   function openModal(id) {
     const modal = document.getElementById(id);
@@ -262,43 +321,31 @@
     });
   }
 
-  function openOriginal(src, title) {
-    const img = $('#catalogOriginalImg');
-    if (!img) return;
-    img.src = src;
-    img.alt = title || '原始版面';
-    $('#catalogOriginalTitle').textContent = title || '原始版面';
-    openModal('catalogOriginalModal');
-  }
+  /* ---------- search ---------- */
 
-  /* ---------- Search ---------- */
-
-  const searchItems = [];
   series.forEach((item, seriesIndex) => {
     searchItems.push({
       type: '系列',
       title: item.name,
-      sub: `印刷页 ${pageRange(item)} · ${item.pages.length} 个产品页`,
+      sub: `印刷页 ${pageRange(item)} · ${item.combos.length} 个 A+B 组合`,
       seriesIndex,
-      hay: `${item.name} ${item.start} ${item.end}`
+      hay: `${item.name} ${item.catalogName || ''} ${item.start || ''} ${item.end || ''}`
     });
-    item.pages.forEach((page) => {
-      filterModels(page.models).forEach((model) => {
-        searchItems.push({
-          type: '型号',
-          title: model.name,
-          sub: `${item.name} · 产品页 ${page.printed}`,
-          seriesIndex,
-          page,
-          hay: `${model.name} ${item.name} ${(page.specs || []).map((spec) => `${spec.label} ${spec.value}`).join(' ')}`
+    item.combos.forEach((combo) => {
+      ['a', 'b'].forEach((part) => {
+        combo[part].forEach((model) => {
+          searchItems.push({
+            type: `${model.part} 型号`,
+            title: model.name,
+            sub: `${item.name} · 印刷页 ${model.page != null ? pad2(model.page) : '系列'}`,
+            seriesIndex,
+            modelId: model.id,
+            hay: `${model.name} ${item.name} ${model.specs.map((spec) => `${spec.label} ${spec.value}`).join(' ')}`
+          });
         });
       });
     });
   });
-
-  function normalize(value) {
-    return String(value || '').toLowerCase().replace(/[\s\-—–_/（）()·,，.。:：]+/g, '');
-  }
 
   function openSearch() {
     const input = $('#catalogSearchInput');
@@ -322,14 +369,11 @@
       return;
     }
     const matches = searchItems
-      .map((item) => {
-        const hay = normalize(item.hay);
-        const pos = hay.indexOf(q);
-        return { item, pos };
-      })
+      .map((item) => ({ item, pos: normalize(item.hay).indexOf(q) }))
       .filter((entry) => entry.pos >= 0)
       .sort((a, b) => a.pos - b.pos)
-      .slice(0, 12);
+      .slice(0, 14);
+
     if (!matches.length) {
       if (empty) empty.hidden = false;
       return;
@@ -349,13 +393,13 @@
       `;
       button.addEventListener('click', () => {
         closeModal('catalogSearchModal');
-        selectSeries(item.seriesIndex);
+        selectSeries(item.seriesIndex, { modelId: item.modelId, hash: false });
       });
       results.appendChild(button);
     });
   }
 
-  /* ---------- Share / PDF / Help / contact ---------- */
+  /* ---------- utility actions ---------- */
 
   async function copyText(text) {
     try {
@@ -379,13 +423,6 @@
       event.preventDefault();
       selectSeries(0);
     });
-    $('#prevSeries')?.addEventListener('click', () => stepSeries(-1));
-    $('#nextSeries')?.addEventListener('click', () => stepSeries(1));
-    dial?.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      stepSeries(event.deltaY > 0 ? 1 : -1);
-    }, { passive: false });
-
     $('#catalogSearchBtn')?.addEventListener('click', openSearch);
     $('#catalogPdfBtn')?.addEventListener('click', () => {
       const link = document.createElement('a');
@@ -398,7 +435,6 @@
     });
     $('#catalogShareBtn')?.addEventListener('click', () => openModal('catalogShareModal'));
     $('#catalogHelpBtn')?.addEventListener('click', () => openModal('catalogHelpModal'));
-
     $('#catalogSearchInput')?.addEventListener('input', (event) => renderSearch(event.target.value));
 
     $('#catalogCopyUrl')?.addEventListener('click', async () => {
@@ -423,12 +459,10 @@
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        if (document.querySelector('.catalog-modal.is-open')) {
-          closeAll();
-          event.preventDefault();
-          return;
-        }
+      if (event.key === 'Escape' && document.querySelector('.catalog-modal.is-open')) {
+        closeAll();
+        event.preventDefault();
+        return;
       }
       const tag = (event.target && event.target.tagName || '').toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
@@ -446,14 +480,13 @@
       }
     });
 
-    window.addEventListener('resize', positionDialNodes);
     window.addEventListener('hashchange', () => {
       const match = location.hash.match(/^#series-(\d+)/);
       if (match) selectSeries(Number(match[1]) - 1, { hash: false });
     });
   }
 
-  /* ---------- Ambient static starfield ---------- */
+  /* ---------- ambient starfield ---------- */
 
   function initStars() {
     const canvas = $('#catalogStarfield');
@@ -474,11 +507,11 @@
       for (let i = 0; i < count; i += 1) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const r = Math.random() * 1.25 + .2;
+        const radius = Math.random() * 1.25 + .2;
         const alpha = Math.random() * .55 + .12;
         ctx.fillStyle = `rgba(190, 220, 255, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
     };
@@ -486,14 +519,13 @@
     window.addEventListener('resize', draw);
   }
 
-  function restoreHash() {
+  function initialSeries() {
     const match = location.hash.match(/^#series-(\d+)/);
-    if (match) return Math.max(0, Math.min(series.length - 1, Number(match[1]) - 1));
-    return 0;
+    return match ? Math.max(0, Math.min(series.length - 1, Number(match[1]) - 1)) : 0;
   }
 
-  buildDial();
+  buildNav();
   wireUi();
   initStars();
-  renderSeries(restoreHash(), { scroll: false, hash: false });
+  renderSeries(initialSeries(), { hash: false });
 })();
